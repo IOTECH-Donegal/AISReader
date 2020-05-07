@@ -1,0 +1,120 @@
+import NMEA.Instrument
+
+
+'''
+Background at 
+https://gpsd.gitlab.io/gpsd/AIVDM.html
+'''
+
+class AIS(NMEA.Instrument.Generic0183):
+    def __init__(self):        # Init for instances
+        super().__init__()
+        # There are several possible talked IDs
+        self.talker_id = ''
+        # The count of fragments in the currently accumulating message
+        self.count_of_fragments = 0
+        # The fragment number of this sentence
+        self.fragment_number = 0
+        # Sequential message ID for multi-sentence messages
+        self.sequential_message_id = 0
+        # AIS Channel A is 161.975Mhz (87B); AIS Channel B is 162.025Mhz (88B).
+        self.AISChannel = ''
+        # Payload
+        self.raw_payload = ''
+        self.processed_payload = []
+        # The number of fill bits requires to pad the data payload to a 6 bit boundary
+        self.fillbits = ''
+        self.checksum = ''
+        self.message_type = ''
+
+    def parse(self, nmea_full_sentence):
+        # Break it up into fields
+        list_of_values = nmea_full_sentence.split(',')
+        # Process the talker ID and assign it to a property
+        talker = list_of_values[0][1:3]
+        self.get_talker_id(talker)
+        # Assign the rest of the fields to properties
+        self.get_list_of_values(list_of_values)
+        # Now decode the payload
+        self.payload_armoring()
+        # Get the message type
+        message_type_field = self.processed_payload[0]
+        print(message_type_field)
+        self.get_message_type(message_type_field)
+        print(self.message_type)
+        self.clear_data()
+
+    def get_list_of_values(self, list_of_values):
+        try:
+            if list_of_values[0][3:] == 'VDM':
+                self.count_of_fragments = list_of_values[1]
+                self.fragment_number = list_of_values[2]
+                self.sequential_message_id = list_of_values[3]
+                self.AISChannel = list_of_values[4]
+                self.raw_payload = list_of_values[5]
+                lastbit = list_of_values[6].split('*')
+                self.fillbits = lastbit[0]
+                self.checksum = lastbit[1]
+            elif list_of_values[0][3:] == 'VDO':
+                print('Found a AIS VDO message but will not process')
+            else:
+                print('Unknown AIS sentence')
+        except ValueError:
+            print('[GPS-parse] Error parsing sentence')
+
+    def get_talker_id(self, talker):
+
+        if talker == 'AB':
+            talker_id = 'Base AIS station'
+        elif talker == 'DB':
+            talker_id = 'Dependent AIS Base Station'
+        elif talker == 'AI':
+            talker_id = 'Mobile AIS Station'
+        elif talker == 'AN':
+            talker_id = 'Aid to navigation AIS Station'
+        elif talker == 'AR':
+            talker_id = 'AIS Receiving Station'
+        elif talker == 'AS':
+            talker_id = 'Limited base Station'
+        elif talker == 'AT':
+            talker_id = 'AIS transmitting Station'
+        elif talker == 'AX':
+            talker_id = 'AIS repeater Station'
+        elif talker == 'SA':
+            talker_id = 'Physical shore Station'
+        else:
+            talker_id = talker + ' unidentified'
+
+        self.talker_id = talker_id
+
+    def payload_armoring(self):
+        print(self.raw_payload)
+        for character in self.raw_payload:
+            decoded_character = ord(character) - 48
+            if decoded_character > 40:
+                decoded_character = decoded_character -8
+            self.processed_payload.append(decoded_character)
+
+    def get_message_type(self, message_type_field):
+        if message_type_field == 1:
+            self.message_type = 'Position Report Class A'
+        if message_type_field == 2:
+            self.message_type = 'Position Report Class A (Assigned schedule)'
+        if message_type_field == 3:
+            self.message_type = 'Position Report Class A (Response to interrogation)'
+        if message_type_field == 4:
+            self.message_type = 'Base Station Report'
+
+    def clear_data(self):
+
+        self.talker_id = ''
+        self.count_of_fragments = 0
+        self.fragment_number = 0
+        self.sequential_message_id = 0
+        self.AISChannel = ''
+        self.raw_payload = ''
+        self.processed_payload = []
+        self.fillbits = ''
+        self.checksum = ''
+        self.message_type = ''
+
