@@ -9,7 +9,7 @@ https://gpsd.gitlab.io/gpsd/AIVDM.html
 class AIS(NMEA.Instrument.Generic0183):
     def __init__(self):        # Init for instances
         super().__init__()
-        # There are several possible talked IDs
+        # There are several possible talker IDs
         self.talker_id = ''
         # The count of fragments in the currently accumulating message
         self.count_of_fragments = 0

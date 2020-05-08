@@ -1,15 +1,9 @@
 
+def decode_longitude(longitude_binary):
+    longitude_int = int(longitude_binary, 2)
 
-def decode_six_bit_ascii(binary_string):
-    if binary_string == '000000':
-        return '@'
-    elif binary_string == '000001':
-        return 'A'
-    elif binary_string == '000010':
-        return 'B'
-    elif binary_string == '000011':
-        return 'C'
-    elif binary_string == '000100':
-        return 'D'
-    else:
-        return 'X'
+    if longitude_int >= 134217728:
+        hemisphere = 'W'
+        longitude = (268435456 - longitude_int) / 600000
+        print(hemisphere)
+        print(longitude)
