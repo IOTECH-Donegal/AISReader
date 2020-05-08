@@ -1,5 +1,5 @@
 import NMEA.Instrument
-
+import NMEA.MessageType1
 
 '''
 Background at 
@@ -39,9 +39,7 @@ class AIS(NMEA.Instrument.Generic0183):
         self.payload_armoring()
         # Get the message type
         message_type_field = self.processed_payload[0]
-        print(message_type_field)
         self.get_message_type(message_type_field)
-        print(self.message_type)
         self.clear_data()
 
     def get_list_of_values(self, list_of_values):
@@ -98,12 +96,61 @@ class AIS(NMEA.Instrument.Generic0183):
     def get_message_type(self, message_type_field):
         if message_type_field == 1:
             self.message_type = 'Position Report Class A'
+            message_type1 = NMEA.MessageType1.Message1()
+            message_type1.decode(self.processed_payload)
+
         if message_type_field == 2:
             self.message_type = 'Position Report Class A (Assigned schedule)'
         if message_type_field == 3:
             self.message_type = 'Position Report Class A (Response to interrogation)'
         if message_type_field == 4:
             self.message_type = 'Base Station Report'
+        if message_type_field == 5:
+            self.message_type = 'Static and Voyage Related Data'
+        if message_type_field == 6:
+            self.message_type = 'Binary Addressed Message'
+        if message_type_field == 7:
+            self.message_type = 'Binary Acknowledge'
+        if message_type_field == 8:
+            self.message_type = 'Binary Broadcast Message'
+        if message_type_field == 9:
+            self.message_type = 'Standard SAR Aircraft Position Report'
+        if message_type_field == 10:
+            self.message_type = 'UTC and Date Inquiry'
+        if message_type_field == 11:
+            self.message_type = 'UTC and Date Response'
+        if message_type_field == 12:
+            self.message_type = 'Addressed Safety Related Message'
+        if message_type_field == 13:
+            self.message_type = 'Safety Related Acknowledgement'
+        if message_type_field == 14:
+            self.message_type = 'Safety Related Broadcast Message'
+        if message_type_field == 15:
+            self.message_type = 'Interrogation'
+        if message_type_field == 16:
+            self.message_type = 'Assignment Mode Command'
+        if message_type_field == 17:
+            self.message_type = 'DGNSS Binary Broadcast Message'
+        if message_type_field == 18:
+            self.message_type = 'Standard Class B CS Position Report'
+        if message_type_field == 19:
+            self.message_type = 'Extended Class B Equipment Position Report'
+        if message_type_field == 20:
+            self.message_type = 'Data Link Management'
+        if message_type_field == 21:
+            self.message_type = 'Aid-to-Navigation Report'
+        if message_type_field == 22:
+            self.message_type = 'Channel Management'
+        if message_type_field == 23:
+            self.message_type = 'Group Assignment Command'
+        if message_type_field == 24:
+            self.message_type = 'Static Data Report'
+        if message_type_field == 25:
+            self.message_type = 'Single Slot Binary Message'
+        if message_type_field == 26:
+            self.message_type = 'Multiple Slot Binary Message With Communications State'
+        if message_type_field == 27:
+            self.message_type = 'Position Report For Long-Range Applications'
 
     def clear_data(self):
 

@@ -1,0 +1,4 @@
+https://gpsd.gitlab.io/gpsd/AIVDM.html#_aivdmaivdo_sentence_layer
+https://github.com/schwehr/noaadata/blob/master/ais/ais_msg_1.py
+http://vislab-ccom.unh.edu/~schwehr/software/noaadata/docs/ais-module.html
+https://stackoverflow.com/questions/27579708/building-ais-messages-decoder
