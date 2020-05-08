@@ -1,5 +1,5 @@
 import array
-import NMEA.Decoder
+import AIS.Utilities
 
 
 class Message1:
@@ -42,7 +42,7 @@ class Message1:
         speed_over_ground = bitstring[50:60]
         position_accuracy = bitstring[60:61]
         longitude_binary = bitstring[61:89]
-        NMEA.Decoder.decode_longitude(longitude_binary)
+        AIS.Utilities.decode_longitude(longitude_binary)
 
         latitude = bitstring[89:116]
         course_over_ground = bitstring[116:128]

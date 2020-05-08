@@ -11,9 +11,9 @@ import threading
 import Communications.UDPDaemon
 import Communications.Utilities
 import NMEA.Instrument
-import NMEA.AI
+import AIS.AIS
 
-myAIS = NMEA.AI.AIS()
+myAIS = AIS.AIS.AISReceiver()
 
 print("Main thread started - AIS UDP Listener")
 local_host_ip = Communications.Utilities.find_local_ipv4()

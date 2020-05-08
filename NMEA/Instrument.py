@@ -22,7 +22,7 @@ class Generic0183:
     '''
         Calculate the CRC of a NMEA sentence
         CRC is a simple XOR of all values between $ and *
-        '''
+    '''
     def calculate_crc(self, nmea_partial_sentence):
         # Reset to zero
         calculated_checksum = 0

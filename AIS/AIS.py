@@ -1,12 +1,13 @@
 import NMEA.Instrument
-import NMEA.MessageType1
+import AIS.MessageType1
 
 '''
 Background at 
 https://gpsd.gitlab.io/gpsd/AIVDM.html
 '''
 
-class AIS(NMEA.Instrument.Generic0183):
+
+class AISReceiver(NMEA.Instrument.Generic0183):
     def __init__(self):        # Init for instances
         super().__init__()
         # There are several possible talker IDs
