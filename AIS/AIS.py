@@ -105,7 +105,11 @@ class AISReceiver(NMEA.Instrument.Generic0183):
             self.message_type = 'Position Report Class A'
             message_type1 = AIS.MessageType1.Message1()
             message_type1.decode(self.processed_payload)
-            print(message_type1.MMSI, message_type1.Longitude, message_type1.Latitude)
+            print(message_type1.MMSI,
+                  message_type1.Longitude,
+                  message_type1.Latitude,
+                  message_type1.COG,
+                  message_type1.SOG)
 
         if message_type_field == 2:
             self.message_type = 'Position Report Class A (Assigned schedule)'

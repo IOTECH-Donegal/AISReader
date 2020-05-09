@@ -86,15 +86,27 @@ class Message1:
 
         try:
             course_over_ground = bitstring[116:128]
-            self.COG = self.decode_cog(course_over_ground)
+            cog_int = int(course_over_ground, 2)
+            # Divide by 10 to remove 0.1 degree precision
+            actual_cog = int(cog_int / 10)
+            # Now make sure leading zeros
+            self.COG = ("{:03d}".format(actual_cog))
         except:
             print('Error - COG')
             return False
 
         try:
+            time_stamp = bitstring[137:143]
+            time_stamp_int = int(time_stamp,2)
+            self.TimeStamp = time_stamp_int
+        except:
+            print('Error - Timestamp')
+            return False
+
+        try:
             position_accuracy = bitstring[60:61]
             true_heading = bitstring[128:137]
-            time_stamp = bitstring[137:143]
+
             maneuver_indicator = bitstring[143:145]
             spare = bitstring[145:148]
             raim = bitstring[148:149]
@@ -170,15 +182,6 @@ class Message1:
             return sog_int
         else:
             return 'Unknown SOG'
-
-    '''
-    Relative to true north, to 0.1 degree precision
-    '''
-    def decode_cog(self, cog):
-        cog_int = int(cog, 2)
-        # Divide by 10 to remove 0.1 degree precision
-        return int(cog_int / 10)
-
 
 
 
