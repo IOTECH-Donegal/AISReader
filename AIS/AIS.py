@@ -29,18 +29,24 @@ class AISReceiver(NMEA.Instrument.Generic0183):
         self.message_type = ''
 
     def parse(self, nmea_full_sentence):
-        # Break it up into fields
-        list_of_values = nmea_full_sentence.split(',')
-        # Process the talker ID and assign it to a property
-        talker = list_of_values[0][1:3]
-        self.get_talker_id(talker)
-        # Assign the rest of the fields to properties
-        self.get_list_of_values(list_of_values)
-        # Now decode the payload
-        self.payload_armoring()
-        # Get the message type
-        message_type_field = self.processed_payload[0]
-        self.get_message_type(message_type_field)
+        try:
+            # Break it up into fields
+            list_of_values = nmea_full_sentence.split(',')
+            # Process the talker ID and assign it to a property
+            talker = list_of_values[0][1:3]
+
+            self.get_talker_id(talker)
+            # Assign the rest of the fields to properties
+            self.get_list_of_values(list_of_values)
+            # Now decode the payload
+            self.payload_armoring()
+
+            # Get the message type
+            message_type_field = self.processed_payload[0]
+            self.get_message_type(message_type_field)
+        except:
+            print('Error processing {}'.format(nmea_full_sentence))
+
         self.clear_data()
 
     def get_list_of_values(self, list_of_values):
@@ -97,13 +103,22 @@ class AISReceiver(NMEA.Instrument.Generic0183):
     def get_message_type(self, message_type_field):
         if message_type_field == 1:
             self.message_type = 'Position Report Class A'
-            message_type1 = NMEA.MessageType1.Message1()
+            message_type1 = AIS.MessageType1.Message1()
             message_type1.decode(self.processed_payload)
+            print(message_type1.MMSI, message_type1.Longitude, message_type1.Latitude)
 
         if message_type_field == 2:
             self.message_type = 'Position Report Class A (Assigned schedule)'
+            # Same decoder as message type 1
+            message_type2 = AIS.MessageType1.Message1()
+            message_type2.decode(self.processed_payload)
+
         if message_type_field == 3:
             self.message_type = 'Position Report Class A (Response to interrogation)'
+            # Same decoder as message type 1
+            message_type3 = AIS.MessageType1.Message1()
+            message_type3.decode(self.processed_payload)
+
         if message_type_field == 4:
             self.message_type = 'Base Station Report'
         if message_type_field == 5:

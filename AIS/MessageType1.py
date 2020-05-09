@@ -11,8 +11,8 @@ class Message1:
         self.ROT = ''
         self.SOG = ''
         self.PositionAccuracy = ''
-        self.longitude = ''
-        self.latitude = ''
+        self.Longitude = ''
+        self.Latitude = ''
         self.COG = ''
         self.TrueHeading = ''
         self.TimeStamp = ''
@@ -26,32 +26,158 @@ class Message1:
     def decode(self, processed_payload):
         # Create a bitstring of all the bits
         bitstring = ''
-        for character in processed_payload:
-            this_six_bits = format(character, '08b')
-            bitstring = bitstring + this_six_bits[-6:]
-        print(bitstring)
+
+        try:
+            for character in processed_payload:
+                this_six_bits = format(character, '08b')
+                bitstring = bitstring + this_six_bits[-6:]
+        except:
+            print('Error processing bitfield')
+            return False
+
+        try:
+            self.RepeatIndicator = bitstring[6:7]
+        except:
+            print('Error - RepeatIndicator')
+            return False
+
+        try:
+            mmsi_binary = bitstring[8:38]
+            self.MMSI = int(mmsi_binary, 2)
+        except:
+            print('Error - MMSI')
+            return False
+
+        try:
+            navigation_status_binary = bitstring[38:42]
+            self.NavigationStatus = self.decode_navigation_status(navigation_status_binary)
+        except:
+            print('Error - Navigation Status')
+            return False
+
+        try:
+            rate_of_turn_binary = bitstring[42:50]
+            self.ROT = self.decode_rate_of_turn(rate_of_turn_binary)
+        except:
+            print('Error - Rate of Turn')
+            return False
+
+        try:
+            speed_over_ground = bitstring[50:60]
+            self.SOG = self.decode_sog(speed_over_ground)
+        except:
+            print('Error - SOG')
+            return False
 
 
-        self.RepeatIndicator = bitstring[6:7]
+        try:
+            longitude_binary = bitstring[61:89]
+            self.Longitude = AIS.Utilities.decode_longitude(longitude_binary)
+        except:
+            print('Error - longitude')
+            return False
 
-        mmsi_binary = bitstring[8:38]
-        self.MMSI = int(mmsi_binary, 2)
+        try:
+            latitude_binary = bitstring[89:116]
+            self.Latitude = AIS.Utilities.decode_latitude(latitude_binary)
+        except:
+            print('Error - latitude')
+            return False
 
-        navigation_status = bitstring[38:42]
-        rate_of_turn = bitstring[42:50]
-        speed_over_ground = bitstring[50:60]
-        position_accuracy = bitstring[60:61]
-        longitude_binary = bitstring[61:89]
-        AIS.Utilities.decode_longitude(longitude_binary)
+        try:
+            course_over_ground = bitstring[116:128]
+            self.COG = self.decode_cog(course_over_ground)
+        except:
+            print('Error - COG')
+            return False
 
-        latitude = bitstring[89:116]
-        course_over_ground = bitstring[116:128]
-        true_heading = bitstring[128:137]
-        time_stamp = bitstring[137:143]
-        maneuver_indicator = bitstring[143:145]
-        spare = bitstring[145:148]
-        raim = bitstring[148:149]
-        radio_status = bitstring[149:168]
+        try:
+            position_accuracy = bitstring[60:61]
+            true_heading = bitstring[128:137]
+            time_stamp = bitstring[137:143]
+            maneuver_indicator = bitstring[143:145]
+            spare = bitstring[145:148]
+            raim = bitstring[148:149]
+            radio_status = bitstring[149:168]
+        except:
+            print('Error in unprocessed fields')
+            return False
+
+    def decode_navigation_status(self, navigation_status):
+
+        navigation_status_int = int(navigation_status, 2)
+
+        if navigation_status_int == 0:
+            return 'Under way using engine'
+        elif navigation_status_int == 1:
+            return 'At anchor'
+        elif navigation_status_int == 2:
+            return 'Not under command'
+        elif navigation_status_int == 3:
+            return 'Restricted manoeuverability'
+        elif navigation_status_int == 4:
+            return 'Constrained by draught'
+        elif navigation_status_int == 5:
+            return 'Moored'
+        elif navigation_status_int == 6:
+            return 'Aground'
+        elif navigation_status_int == 7:
+            return 'Engaged in Fishing'
+        elif navigation_status_int == 8:
+            return 'Under way sailing'
+        elif navigation_status_int == 9-13:
+            return 'Reserved'
+        elif navigation_status_int == 14:
+            return 'AIS - SART is active'
+        elif navigation_status_int == 15:
+            return 'Not defined'
+        else:
+            return 'Unknown value'
+
+    '''
+    0 = not turning
+    1…​126 = turning right at up to 708 degrees per minute or higher
+    1…​-126 = turning left at up to 708 degrees per minute or higher
+    127 = turning right at more than 5deg/30s (No TI available)
+    -127 = turning left at more than 5deg/30s (No TI available)
+    128 (80 hex) indicates no turn information available (default)
+    '''
+    def decode_rate_of_turn(self, rate_of_turn):
+
+        rate_of_turn_int = int(rate_of_turn, 2)
+
+        if rate_of_turn_int == 0:
+            return 'Not Turning'
+        elif rate_of_turn_int == 127:
+            return 'Turning to Starboard'
+        elif rate_of_turn_int == -127:
+            return 'Turning to Port'
+        elif 1 <= rate_of_turn_int <= 126:
+            return 'Turning to Starboard'
+        elif -126 <= rate_of_turn_int <= 1:
+            return 'Turning to Port'
+        else:
+            return 'Unknown rate of turn'
+
+    def decode_sog(self, sog):
+        sog_int = int(sog, 2)
+
+        if sog_int == 1023:
+            return"Speed not available"
+        elif sog_int ==1022:
+            return "Way too fast!"
+        elif 0 <= sog_int <= 102:
+            return sog_int
+        else:
+            return 'Unknown SOG'
+
+    '''
+    Relative to true north, to 0.1 degree precision
+    '''
+    def decode_cog(self, cog):
+        cog_int = int(cog, 2)
+        # Divide by 10 to remove 0.1 degree precision
+        return int(cog_int / 10)
 
 
 
